@@ -1,0 +1,109 @@
+import time
+import mcp3008
+import RPi.GPIO as GPIO
+from time import gmtime, strftime
+
+# ANSI escape codes
+PREVIOUS_LINE="\x1b[1F"
+RED_BACK="\x1b[41;37m"
+GREEN_BACK="\x1b[42;30m"
+YELLOW_BACK="\x1b[43;30m"
+RESET="\x1b[0m"
+
+# Clear the screen and put the cursor at the top
+#print '\x1b[2J\x1b[H'
+#print 'Moisture sensor'
+#print '===============\n'
+
+# Sets the GPIO mode to BCM for calling on the pins
+GPIO.setmode(GPIO.BCM)
+# Sets the GPIO pin we are using (17) to an out pin
+GPIO.setup(17, GPIO.OUT)
+
+
+def hourly_checks(i):
+	print '\x1b[2J\x1b[H'
+	print 'Moiture sensor'
+	print '==============\n'
+	global PREVIOUS_LINE, RED_BACK, GREEN_BACK, YELLOW_BACK, RESET
+	while True:
+		# Creates an array for logging the lines in the log file
+		log_file=[]
+		# Collects the current time to print int he log file later
+        	cur_time = strftime("%Y-%m-%d %H:%M:%S, ", gmtime())
+		# Save the reading from the moisture sensor as variable 'm'
+		m = mcp3008.readadc(5)
+		# Opens the log file
+		f = open ('log.txt', 'r')
+
+    		# Reads each line in the log file to memory
+		for line in f:
+			log_file.append(line)
+		f.close()
+		# Re-opens the log file as a writable file this time and write the current moisture level
+		f = open('log.txt', 'w')
+		opening_line=0
+		for x in log_file:
+    			f.write(str(x))
+		if m < 500:
+			# Sets teh background according to the mooisture level and prints it
+			background = RED_BACK
+			print PREVIOUS_LINE + background + "Moisture level: {:>5} ".format(m) + RESET
+			f.write(str(cur_time)+'Moisture level: '+str(m)+' - Watered this hour. \n')
+			GPIO.output(17, GPIO.HIGH)
+			time.sleep(5)
+			GPIO.output(17, GPIO.LOW)
+		else: 
+			# Sets the background color according to the moisture level and prints it
+			background = GREEN_BACK
+			print PREVIOUS_LINE + background + "Moisture level: {:>5} ".format(m) + RESET
+			f.write(str(cur_time)+'Moiture level: '+str(m)+'.\n')
+		f.close()
+		# Increments variable keeping track of how many log lines are in the file (onle one week is kept in logs)
+		i=i+1
+		# If there are more than one weeks of logs, it removes the oldest log entry
+		if i > 168:
+			f = open('log.txt', 'r')
+			w=[]
+			for line in f:
+				w.append(line)
+			w.pop
+			f = open('log.txt', 'w')
+			for x in w:
+				f.write(str(x)+'\n')
+		# Wait for an hour before the next reading
+		time.sleep(30)
+		hour_loop = 60
+		minute_loop = 60
+		while hour_loop > 1:
+			While minute_loop > 1:
+				print (str(hour_loop)+":"+str(minute_loop
+
+
+time.sleep(5)
+#try:
+i=1
+f = open('log.txt', 'w')
+date_time = strftime("%Y-%m-%d %H:%M:%S")
+f.write('Log of past weeks moisture levels')
+
+hourly_checks(i)
+#except Exception as e:
+	#print type(e)
+	#print e.args
+	#print e
+	#f = open('error_log.txt', 'w')
+	#f.write(type(e))
+	#f.write(e.args)
+	#f.write(e)
+	#f.close()
+
+    #if m < 150:
+    #    background = RED_BACK
+    #elif m < 500:
+    #    background = YELLOW_BACK
+    #else:
+    #    background = GREEN_BACK
+    #print PREVIOUS_LINE + background + "Moisture level: {:>5} ".format(m) + RESET
+
+    #sleep(.5)

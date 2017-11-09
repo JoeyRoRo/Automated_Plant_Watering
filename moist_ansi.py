@@ -148,8 +148,6 @@ if __name__ == "__main__":
 	while True:
 		try:
 			hourly_checks()
-		except (SystemExit, KeyboardInterrupt):
-			raise
 		except Exception as e:
 			global log_num
 			logger.error('Failed at keeping the plants '+ \
